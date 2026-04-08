@@ -1,0 +1,30 @@
+{
+  "name": "assistsx-agent-control",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:registry": "ASSISTSX_USE_NPM=1 vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "typecheck": "vue-tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "assistsx-js": "file:../assistsx-js",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "eslint": "^9.39.4",
+    "eslint-plugin-vue": "^9.32.0",
+    "globals": "^17.4.0",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.0",
+    "vite": "^8.0.1",
+    "vue-tsc": "^2.2.0"
+  }
+}

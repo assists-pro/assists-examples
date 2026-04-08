@@ -1,0 +1,11 @@
+{
+    "name": "日志示例",
+    "versionName": "0.0.2",
+    "versionCode": 2,
+    "description": "assistsx-js 日志示例：节点绑定、上报与后台查看",
+    "packageName": "com.assistsx.log.example",
+    "index": "index.html",
+    "indexInOverlay": false,
+    "icon": "image.png",
+    "sourceUrl": "https://github.com/ven-coder/assistsx-log-simple"
+}
