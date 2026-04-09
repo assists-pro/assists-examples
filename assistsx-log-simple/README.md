@@ -17,7 +17,7 @@
 | 框架 | Vue 3、vue-router 4 |
 | 构建 | Vite 8、`@vitejs/plugin-vue` |
 | 语言 | TypeScript、vue-tsc |
-| 日志 SDK | `assistsx-js`（`package.json` 中默认为相邻目录 `../assistsx-js`，可按需改为 registry 版本） |
+| 日志 SDK | `assistsx-js`（从 npm 安装，当前为 `^0.2.0`，与 registry 能力一致；本地联调见下文） |
 
 ## 路由
 
@@ -37,11 +37,13 @@ npm run dev
 
 默认开发服务器：<http://localhost:5173>（见 `vite.config.js`）。
 
-### assistsx-js 解析方式
+### assistsx-js：公开仓库与本地联调
 
-- **默认**：若存在相邻仓库 `../assistsx-js` 且含 `src/index.ts`，开发模式会通过别名直连本地源码（便于联调）。
-- **强制使用 node_modules**：`ASSISTSX_USE_NPM=1 npm run dev`（或使用脚本 `npm run dev:registry`）。
-- **自定义本地路径**：设置环境变量 `ASSISTSX_JS_LOCAL` 指向 assistsx-js 根目录。
+- **克隆本仓库后**：执行 `npm install` 即可从 npm 安装 `assistsx-js`（与 lockfile 一致），无需在旁再放一份 assistsx-js 源码。
+- **开发时联调本机 assistsx-js 源码**（推荐）：将 `.env.example` 中的 `ASSISTSX_JS_LOCAL` 复制到 **`.env.local`**（已被 `*.local` 忽略，勿提交），设为本机仓库根目录绝对路径；再 `npm run dev`。开发模式下 Vite 会把 `assistsx-js` 解析到该目录的 `src/index.ts`。
+- **未设置 `ASSISTSX_JS_LOCAL` 时**：若存在相邻目录 `../assistsx-js` 且含 `src/index.ts`，仍会走该路径的别名；否则使用 `node_modules` 中的包（与 npm 安装或 `npm link` 一致）。
+- **强制与 npm 包一致（不走本地别名）**：`npm run dev:registry` 或 `ASSISTSX_USE_NPM=1 npm run dev`。
+- **npm link**：在 assistsx-js 仓库执行 `npm link`，在本项目执行 `npm link assistsx-js`，可在不设 `ASSISTSX_JS_LOCAL`、且不存在可用的 `../assistsx-js` 时，让 `node_modules` 指向本地包（适合验证链接后的构建产物）。
 
 ### 其他命令
 

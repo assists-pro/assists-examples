@@ -25,3 +25,5 @@ dist-ssr
 upload_plugin_cli.py
 dist.zip
 __pycache__/
+.env.local
+.env
