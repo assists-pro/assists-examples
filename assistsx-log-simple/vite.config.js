@@ -6,6 +6,9 @@ import vue from '@vitejs/plugin-vue'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+/** 与 `vite.config.js` 同目录，保证 `.env` 定义在 assistsx-log-simple 内即可 */
+const envDir = __dirname
+
 /** 开发模式下本地 assistsx-js 入口是否存在（有则走源码，否则回退 node_modules） */
 function assistsxLocalEntryExists(assistsxDevEntry) {
   try {
@@ -17,7 +20,7 @@ function assistsxLocalEntryExists(assistsxDevEntry) {
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  const env = loadEnv(mode, envDir, '')
   // 命令行优先于 .env / .env.local，便于临时覆盖
   const assistsxLocalOverride =
     process.env.ASSISTSX_JS_LOCAL ?? env.ASSISTSX_JS_LOCAL
@@ -44,6 +47,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    envDir,
     plugins: [vue()],
     resolve: {
       alias: useLocalAssistsx

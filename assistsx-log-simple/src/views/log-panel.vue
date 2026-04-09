@@ -47,11 +47,12 @@ import {
   ref,
 } from "vue";
 import { useRoute } from "vue-router";
+import { getLogUploadEnv } from "../config/log-upload-env";
 
 defineOptions({ name: "LogPanelPage" });
 
-/** 与宿主端 uploadLogs / AssistsLogDiagnostics 的 uploadKey 一致 */
-const LOG_UPLOAD_KEY = "ulk_Y7MnauToi6rS8Ioi5G-HLuIsxQMvGFb45mw1Y91_xi0";
+/** 构建期来自 .env / .env.local 的 VITE_*，未配置时与原先硬编码行为一致 */
+const logUploadEnv = getLogUploadEnv();
 
 const route = useRoute();
 
@@ -180,20 +181,28 @@ async function onUploadClick() {
   uploading.value = true;
   // void float.toast("正在上传日志，请稍候…").catch(() => {});
   try {
+    console.log("logUploadEnv", logUploadEnv);
     const result = await log.uploadLogs({
       timeout: 120,
-      uploadKey: LOG_UPLOAD_KEY,
+      uploadKey: logUploadEnv.uploadKey,
+      ...(logUploadEnv.logServiceBaseUrl
+        ? { baseUrl: logUploadEnv.logServiceBaseUrl }
+        : {}),
     });
     if (result.success) {
-      let baseUrl = "";
-      try {
-        baseUrl = (await log.getLogServiceBaseUrl()).trim();
-      } catch {
-        // 与上传结果无关，忽略
+      let displayBaseUrl = logUploadEnv.logServiceBaseUrl;
+      if (!displayBaseUrl) {
+        try {
+          displayBaseUrl = (await log.getLogServiceBaseUrl()).trim();
+        } catch {
+          // 与上传结果无关，忽略
+        }
       }
-      const line = baseUrl
-        ? `日志已成功上传，请访问 ${baseUrl} 管理后台查看日志。`
-        : "日志已成功上传，请访问日志服务管理后台查看日志。";
+      const testAccountNote =
+        "测试账号：test，密码：123321。测试账号日志仅保留 10 分钟且最多 10 条。";
+      const line = displayBaseUrl
+        ? `日志已成功上传，请访问 ${displayBaseUrl} 管理后台查看日志。\n${testAccountNote}`
+        : `日志已成功上传，请访问日志服务管理后台查看日志。\n${testAccountNote}`;
       log.appendTimestampedEntry(line);
     } else {
       log.appendTimestampedEntry(formatUploadFailureForLog(result));
