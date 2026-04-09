@@ -2,7 +2,7 @@
 
 基于 **Vue 3**、**Vite** 与 **assistsx-js** 的日志示例前端：演示日志追加、监听、`uploadLogs` 上报，以及浮窗与页面内两种打开方式。
 
-源码仓库：<https://github.com/ven-coder/assistsx-log-simple>
+源码目录：<https://github.com/assists-pro/assists-examples/tree/main/assistsx-log-simple>
 
 ## 功能概览
 

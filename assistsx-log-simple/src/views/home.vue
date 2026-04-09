@@ -110,7 +110,8 @@ import { computed, onMounted, ref } from "vue";
 defineOptions({ name: "HomePage" });
 
 /** 与 public/config.json 中 sourceUrl 一致，可被运行时覆盖 */
-const DEFAULT_SOURCE_URL = "https://github.com/ven-coder/assistsx-log-simple";
+const DEFAULT_SOURCE_URL =
+  "https://github.com/assists-pro/assists-examples/tree/main/assistsx-log-simple";
 
 const floatingHint = ref("");
 const sourceUrl = ref(DEFAULT_SOURCE_URL);
