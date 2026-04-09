@@ -1,7 +1,7 @@
 {
     "name": "日志示例",
-    "versionName": "0.0.3",
-    "versionCode": 3,
+    "versionName": "0.0.4",
+    "versionCode": 4,
     "description": "assistsx-js 日志示例：节点绑定、上报与后台查看",
     "packageName": "com.assistsx.log.example",
     "index": "index.html",
