@@ -1,4 +1,4 @@
-import { AssistsX } from 'assistsx-js'
+import { AssistsX, AssistsXAsync, Step } from 'assistsx-js'
 import {
   STORAGE_KEY_UNFOLLOW_ACCOUNTS,
   log,
@@ -65,11 +65,13 @@ export async function runTaskByQuery(task: string | undefined): Promise<void> {
       break
     }
     case 'test':
-      await clearLogs()
-      log(
-        AssistsX.findByTextAllMatch('微信助手')[0]?.text ??
-          '(no node matching 微信助手)',
-      )
+      await clearLogs();
+      AssistsXAsync.launchApp('com.tencent.mm');
+      //延迟1秒钟
+      await Promise.resolve(new Promise(resolve => setTimeout(resolve, 2000)));
+      (await AssistsXAsync.getAllNodes()).forEach(node => {
+        console.log(node)
+      })
       break
     default:
       log(`Unknown task: ${task}`)

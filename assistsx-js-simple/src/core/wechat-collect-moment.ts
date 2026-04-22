@@ -3,20 +3,8 @@ import { log, clearLogs } from "../logging/app-log";
 import { wechatEnter } from "./wechat-enter";
 
 class WechatCollectMoment {
-    /** 点击「朋友圈」后的步骤，可由点赞流程替换 */
-    private afterEnterMoment: (step: Step) => Promise<Step | undefined>;
-
-    constructor() {
-        this.afterEnterMoment = this.collectMoment.bind(this)
-    }
-
-    setAfterEnterMoment(fn: (step: Step) => Promise<Step | undefined>): void {
-        this.afterEnterMoment = fn
-    }
-
     start = (): void => {
         clearLogs()
-        this.afterEnterMoment = this.collectMoment.bind(this)
         Step.run(wechatEnter.launchWechat, {
             data: { COLLECT_MOMENT: true },
             delayMs: 1000,
@@ -31,13 +19,13 @@ class WechatCollectMoment {
     switchDiscover = async (step: Step): Promise<Step | undefined> => {
         const packageName = step.getPackageName();
         if (packageName !== wechatEnter.wechatPackageName) {
-            log('微信打开失败')
+            log('WX打开失败')
             return undefined
         }
 
         const bottomBarNode = step.findByTags(NodeClassValue.RelativeLayout, { filterViewId: "com.tencent.mm:id/huj" })[0];
         if (!bottomBarNode) {
-            log('微信底部栏未找到，尝试返回重试')
+            log('WX底部栏未找到，尝试返回重试')
             step.back();
             return step.repeat()
         }
@@ -49,7 +37,7 @@ class WechatCollectMoment {
         } else {
             log('点击"发现"失败')
         }
-        return step.next(this.enterMoment.bind(this))
+        return step.next(this.enterMoment)
     };
 
     private enterMoment = async (step: Step): Promise<Step | undefined> => {
@@ -61,7 +49,7 @@ class WechatCollectMoment {
             log('点击"朋友圈"失败')
         }
 
-        return step.next((s) => this.afterEnterMoment(s))
+        return step.next(this.collectMoment)
     };
 
     private collectMoment = async (step: Step): Promise<Step | undefined> => {

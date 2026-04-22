@@ -7,120 +7,113 @@ import {
   useStepStore,
   type LogUpdateEvent,
   type LogUploadResult,
-} from 'assistsx-js'
-import {
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-} from 'vue'
-import { useRoute } from 'vue-router'
-import { runTaskByQuery } from '@/core/task-runners'
-import { getLogUploadEnv } from '@/config/log-upload-env'
+} from "assistsx-js";
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
+import { useRoute } from "vue-router";
+import { runTaskByQuery } from "@/core/task-runners";
+import { getLogUploadEnv } from "@/config/log-upload-env";
 
-const route = useRoute()
-const stepStore = useStepStore()
-const originalTitle = document.title
+const route = useRoute();
+const stepStore = useStepStore();
+const originalTitle = document.title;
 
-const logUploadEnv = getLogUploadEnv()
+const logUploadEnv = getLogUploadEnv();
 
 /** 浮窗打开（无 inline=1）时为 true */
 const isFloatingLog = computed(() => {
-  const q = route.query.inline
-  const isInline = q === '1' || (Array.isArray(q) && q[0] === '1')
-  return !isInline
-})
+  const q = route.query.inline;
+  const isInline = q === "1" || (Array.isArray(q) && q[0] === "1");
+  return !isInline;
+});
 
 /** 步骤仍在运行时可停止 */
 const showStopButton = computed(
-  () =>
-    stepStore.status !== 'completed' && stepStore.status !== 'error',
-)
+  () => stepStore.status !== "completed" && stepStore.status !== "error",
+);
 
-const lines = ref<string[]>([])
-const clearing = ref(false)
-const uploading = ref(false)
-const outputRef = ref<HTMLElement | null>(null)
+const lines = ref<string[]>([]);
+const clearing = ref(false);
+const uploading = ref(false);
+const outputRef = ref<HTMLElement | null>(null);
 
 const displayText = computed(() =>
-  lines.value.length > 0 ? lines.value.join('\n') : '暂无日志内容。',
-)
+  lines.value.length > 0 ? lines.value.join("\n") : "暂无日志内容。",
+);
 
 function scrollToBottom() {
   void nextTick(() => {
-    const el = outputRef.value
+    const el = outputRef.value;
     if (el) {
-      el.scrollTop = el.scrollHeight
+      el.scrollTop = el.scrollHeight;
     }
-  })
+  });
 }
 
 function onLogUpdate(ev: LogUpdateEvent) {
   if (ev.code !== 0 || !ev.data) {
-    return
+    return;
   }
-  const { stream, text } = ev.data
+  const { stream, text } = ev.data;
   if (stream === LogStream.entireLogText) {
-    lines.value = text ? text.split(/\r?\n/) : []
+    lines.value = text ? text.split(/\r?\n/) : [];
   } else {
-    const line = text.trimEnd()
+    const line = text.trimEnd();
     if (line) {
-      lines.value = [...lines.value, line]
+      lines.value = [...lines.value, line];
     }
   }
-  scrollToBottom()
+  scrollToBottom();
 }
 
 async function loadLogFromBridge() {
   try {
-    const t = (await log.readAllText()).trimEnd()
+    const t = (await log.readAllText()).trimEnd();
     if (t) {
-      lines.value = t.split(/\r?\n/)
+      lines.value = t.split(/\r?\n/);
     }
   } catch {
     // 无 assistsxLog 桥接时忽略
   } finally {
-    scrollToBottom()
+    scrollToBottom();
   }
 }
 
 function formatUploadFailureForLog(result: LogUploadResult): string {
-  const parts: string[] = ['[上传失败]']
-  parts.push(`message: ${result.message}`)
+  const parts: string[] = ["[上传失败]"];
+  parts.push(`message: ${result.message}`);
   if (result.httpCode !== undefined) {
-    parts.push(`httpCode: ${String(result.httpCode)}`)
+    parts.push(`httpCode: ${String(result.httpCode)}`);
   }
   if (result.causeMessage) {
-    parts.push(`causeMessage: ${result.causeMessage}`)
+    parts.push(`causeMessage: ${result.causeMessage}`);
   }
   if (result.responseBody) {
-    parts.push(`responseBody: ${result.responseBody}`)
+    parts.push(`responseBody: ${result.responseBody}`);
   }
   if (result.localLogFilePath) {
-    parts.push(`localLogFilePath: ${result.localLogFilePath}`)
+    parts.push(`localLogFilePath: ${result.localLogFilePath}`);
   }
   if (result.localScreenshotFilePath) {
-    parts.push(`localScreenshotFilePath: ${result.localScreenshotFilePath}`)
+    parts.push(`localScreenshotFilePath: ${result.localScreenshotFilePath}`);
   }
   if (result.localNodeTreeFilePath) {
-    parts.push(`localNodeTreeFilePath: ${result.localNodeTreeFilePath}`)
+    parts.push(`localNodeTreeFilePath: ${result.localNodeTreeFilePath}`);
   }
   if (result.data !== undefined) {
     const s =
-      typeof result.data === 'string'
+      typeof result.data === "string"
         ? result.data
-        : JSON.stringify(result.data, null, 2)
-    parts.push(`data: ${s}`)
+        : JSON.stringify(result.data, null, 2);
+    parts.push(`data: ${s}`);
   }
-  return parts.join('\n')
+  return parts.join("\n");
 }
 
 async function onUploadClick() {
   if (uploading.value) {
-    return
+    return;
   }
-  uploading.value = true
+  uploading.value = true;
   try {
     const result = await log.uploadLogs({
       timeout: 120,
@@ -128,92 +121,89 @@ async function onUploadClick() {
       ...(logUploadEnv.logServiceBaseUrl
         ? { baseUrl: logUploadEnv.logServiceBaseUrl }
         : {}),
-    })
+    });
     if (result.success) {
-      let displayBaseUrl = logUploadEnv.logServiceBaseUrl
+      let displayBaseUrl = logUploadEnv.logServiceBaseUrl;
       if (!displayBaseUrl) {
         try {
-          displayBaseUrl = (await log.getLogServiceBaseUrl()).trim()
+          displayBaseUrl = (await log.getLogServiceBaseUrl()).trim();
         } catch {
           // ignore
         }
       }
       const testAccountNote =
-        '测试账号：test，密码：123321。测试账号日志仅保留 10 分钟且最多 10 条。'
+        "测试账号：test，密码：123321。测试账号日志仅保留 10 分钟且最多 10 条。";
       const line = displayBaseUrl
         ? `日志已成功上传，请访问 ${displayBaseUrl} 管理后台查看日志。\n${testAccountNote}`
-        : `日志已成功上传，请访问日志服务管理后台查看日志。\n${testAccountNote}`
-      log.appendTimestampedEntry(line)
+        : `日志已成功上传，请访问日志服务管理后台查看日志。\n${testAccountNote}`;
+      log.appendTimestampedEntry(line);
     } else {
-      log.appendTimestampedEntry(formatUploadFailureForLog(result))
+      log.appendTimestampedEntry(formatUploadFailureForLog(result));
     }
   } catch (e) {
     const detail =
       e instanceof Error
-        ? `${e.message}${e.stack ? `\n${e.stack}` : ''}`
-        : String(e)
-    log.appendTimestampedEntry(`[上传异常]\n${detail}`)
+        ? `${e.message}${e.stack ? `\n${e.stack}` : ""}`
+        : String(e);
+    log.appendTimestampedEntry(`[上传异常]\n${detail}`);
   } finally {
-    uploading.value = false
+    uploading.value = false;
   }
 }
 
 async function onClearLog() {
   if (clearing.value) {
-    return
+    return;
   }
-  clearing.value = true
+  clearing.value = true;
   try {
-    const ok = await log.clear()
+    const ok = await log.clear();
     if (ok) {
-      lines.value = []
-      void float.toast('已清空日志', 1800).catch(() => {})
+      lines.value = [];
+      void float.toast("已清空日志", 1800).catch(() => {});
     } else {
-      void float.toast('清空失败', 2200).catch(() => {})
+      void float.toast("清空失败", 2200).catch(() => {});
     }
   } catch (e) {
-    const msg = e instanceof Error ? e.message : '清空失败'
-    void float.toast(msg, 2200).catch(() => {})
+    const msg = e instanceof Error ? e.message : "清空失败";
+    void float.toast(msg, 2200).catch(() => {});
   } finally {
-    clearing.value = false
+    clearing.value = false;
   }
 }
 
 const stopStep = () => {
-  Step.stop()
-  void log.appendTimestampedEntry('主动停止')
-}
+  Step.stop();
+  void log.appendTimestampedEntry("主动停止");
+};
 
 onMounted(async () => {
-  document.title = '执行日志'
-  log.addLogUpdateListener(onLogUpdate)
-  scrollToBottom()
-  await loadLogFromBridge()
+  document.title = "执行日志";
+  log.addLogUpdateListener(onLogUpdate);
+  scrollToBottom();
+  await loadLogFromBridge();
 
-  const raw = route.query.task
-  let task: string | undefined
-  if (typeof raw === 'string') {
-    task = raw
+  const raw = route.query.task;
+  let task: string | undefined;
+  if (typeof raw === "string") {
+    task = raw;
   } else if (Array.isArray(raw)) {
-    const first = raw[0]
-    task = first === null || first === undefined ? undefined : String(first)
+    const first = raw[0];
+    task = first === null || first === undefined ? undefined : String(first);
   } else {
-    task = undefined
+    task = undefined;
   }
-  await runTaskByQuery(task)
-})
+  await runTaskByQuery(task);
+});
 
 onUnmounted(() => {
-  document.title = originalTitle
-  log.removeLogUpdateListener(onLogUpdate)
-})
+  document.title = originalTitle;
+  log.removeLogUpdateListener(onLogUpdate);
+});
 </script>
 
 <template>
-  <div
-    class="log-page"
-    :class="{ 'log-page--floating': isFloatingLog }"
-  >
+  <div class="log-page" :class="{ 'log-page--floating': isFloatingLog }">
     <div v-if="showStopButton" class="log-toolbar">
       <div class="log-toolbar-start">
         <button type="button" class="stop-button" @click="stopStep">
@@ -221,11 +211,9 @@ onUnmounted(() => {
         </button>
       </div>
     </div>
-    <pre
-      ref="outputRef"
-      class="log-output"
-      aria-live="polite"
-    >{{ displayText }}</pre>
+    <pre ref="outputRef" class="log-output" aria-live="polite">{{
+      displayText
+    }}</pre>
     <footer class="log-actions">
       <button
         type="button"
@@ -233,7 +221,7 @@ onUnmounted(() => {
         :disabled="clearing"
         @click="onClearLog"
       >
-        {{ clearing ? '清空中…' : '清空日志' }}
+        {{ clearing ? "清空中…" : "清空日志" }}
       </button>
       <button
         type="button"
@@ -241,7 +229,7 @@ onUnmounted(() => {
         :disabled="uploading"
         @click="onUploadClick"
       >
-        {{ uploading ? '上传中…' : '上传日志' }}
+        {{ uploading ? "上传中…" : "上传日志" }}
       </button>
     </footer>
   </div>
@@ -262,7 +250,7 @@ onUnmounted(() => {
 }
 
 .log-page--floating {
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
 }
 
 .log-toolbar {

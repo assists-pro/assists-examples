@@ -29,13 +29,13 @@ class WechatUnfollowOfficialAccount {
     switchContacts = async (step: Step): Promise<Step | undefined> => {
         const packageName = step.getPackageName();
         if (packageName !== wechatEnter.wechatPackageName) {
-            log('微信打开失败')
+            log('WX打开失败')
             return undefined
         }
 
         const bottomBarNode = step.findByTags(NodeClassValue.RelativeLayout, { filterViewId: "com.tencent.mm:id/huj" })[0];
         if (!bottomBarNode) {
-            log('微信底部栏未找到，尝试返回重试')
+            log('WX底部栏未找到，尝试返回重试')
             step.back();
             return step.repeat()
         }
@@ -47,7 +47,7 @@ class WechatUnfollowOfficialAccount {
         } else {
             log('点击"通讯录"失败')
         }
-        return step.next(this.enterOfficialAccount.bind(this))
+        return step.next(this.enterOfficialAccount)
     };
 
 
@@ -69,7 +69,7 @@ class WechatUnfollowOfficialAccount {
             log('点击"公众号"失败')
         }
 
-        return step.next(this.enterOfficialAccountConversation.bind(this))
+        return step.next(this.enterOfficialAccountConversation)
     };
 
     private enterOfficialAccountConversation = async (step: Step): Promise<Step | undefined> => {
@@ -85,7 +85,7 @@ class WechatUnfollowOfficialAccount {
                 await child.clickNodeByGesture()
                 log(`点击公众号:${name}`)
                 this.accountsToUnfollow.splice(this.accountsToUnfollow.indexOf(name), 1)
-                return step.next(this.enterOfficialAccountProfile.bind(this))
+                return step.next(this.enterOfficialAccountProfile)
             }
         }
         return undefined
@@ -94,19 +94,19 @@ class WechatUnfollowOfficialAccount {
     private enterOfficialAccountProfile = async (step: Step): Promise<Step | undefined> => {
         step.findById("com.tencent.mm:id/fq")[0].click()
         log('点击"设置"')
-        return step.next(this.clickUnfollowOfficialAccount.bind(this))
+        return step.next(this.clickUnfollowOfficialAccount)
     };
 
     private clickUnfollowOfficialAccount = async (step: Step): Promise<Step | undefined> => {
         step.findById("com.tencent.mm:id/anv")[0].click()
         log('点击"已关注公众号"')
-        return step.next(this.clickUnfollowOfficialAccountConfirm.bind(this))
+        return step.next(this.clickUnfollowOfficialAccountConfirm)
     };
 
     private clickUnfollowOfficialAccountConfirm = async (step: Step): Promise<Step | undefined> => {
         step.findById("com.tencent.mm:id/mm_alert_ok_btn")[0].click()
         log('点击"不再关注"')
-        return step.next(this.checkUnfollowOfficialAccountSuccess.bind(this))
+        return step.next(this.checkUnfollowOfficialAccountSuccess)
     };
 
     private checkUnfollowOfficialAccountSuccess = async (step: Step): Promise<Step | undefined> => {
@@ -120,14 +120,14 @@ class WechatUnfollowOfficialAccount {
         if (!followNode) {
             log('已取消关注')
         }
-        return step.next(this.backOfficialAccountsList.bind(this))
+        return step.next(this.backOfficialAccountsList)
     };
 
     private backOfficialAccountsList = async (step: Step): Promise<Step | undefined> => {
 
         const listNode = step.findById("com.tencent.mm:id/i3y", { filterClass: "android.widget.ListView" })[0]
         if (listNode) {
-            return step.next(this.enterOfficialAccountConversation.bind(this))
+            return step.next(this.enterOfficialAccountConversation)
         } else {
             step.back()
             return step.repeat()

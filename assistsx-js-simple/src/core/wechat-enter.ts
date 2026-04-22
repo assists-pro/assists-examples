@@ -4,11 +4,12 @@ import { wechatCollectAccountInfo } from "./wechat-collect-account-info";
 import { wechatCollectMoment } from "./wechat-collect-moment";
 import { wechatCollectOfficialAccount } from "./wechat-collect-official-account";
 import { wechatUnfollowOfficialAccount } from "./wechat-unfollow-official-account";
+import { wxMomentLike } from "./wx-moment-like";
 
-/** Step.run data 中与微信自动化入口对应的字段（与各模块 start 传入一致） */
+/** Step.run data 中与WX自动化入口对应的字段（与各模块 start 传入一致） */
 export interface WechatStepData {
     COLLECT_ACCOUNT_INFO?: boolean;
-    COLLECT_MOMENT?: boolean;
+    MOMENT_LIKE?: boolean;
     COLLECT_OFFICIAL_ACCOUNT?: boolean;
     UNFOLLOW_OFFICIAL_ACCOUNT?: boolean;
     unfollowAccounts?: string[];
@@ -21,15 +22,15 @@ class WechatEnter {
         log('开始执行')
         await step.delay(1000)
         step.launchApp(this.wechatPackageName);
-        log('启动微信')
+        log('启动WX')
         return step.next(this.checkDoubleWechatOpen)
     };
     private checkDoubleWechatOpen: StepImpl = async (step: Step): Promise<StepResult> => {
-        log('检查微信双开')
+        log('检查WX双开')
         const node = step.findById("com.miui.securitycore:id/app1");
         if (node[0]) {
             node[0].click();
-            log('微信双开，选择微信1')
+            log('WX双开，选择WX1')
             return step.next(async (step) => await this.checkMain(step), {
                 delayMs: 1000,
             })
@@ -42,7 +43,7 @@ class WechatEnter {
         if (packageName !== this.wechatPackageName) {
 
             if (step.repeatCount > 3) {
-                log('微信打开失败')
+                log('WX打开失败')
                 return undefined
             }
 
@@ -53,7 +54,7 @@ class WechatEnter {
             filterViewId: "com.tencent.mm:id/huj",
         })[0];
         if (!bottomBarNode) {
-            log('微信底部栏未找到，尝试返回重试')
+            log('WX底部栏未找到，尝试返回重试')
             step.back();
             return step.repeat()
         }
@@ -65,9 +66,9 @@ class WechatEnter {
             return step.next(wechatCollectAccountInfo.switchMe)
         }
 
-        if (data?.COLLECT_MOMENT) {
-            data.COLLECT_MOMENT = undefined;
-            return step.next(wechatCollectMoment.switchDiscover)
+        if (data?.MOMENT_LIKE) {
+            data.MOMENT_LIKE = undefined;
+            return step.next(wxMomentLike.switchDiscover)
         }
 
         if (data?.COLLECT_OFFICIAL_ACCOUNT) {

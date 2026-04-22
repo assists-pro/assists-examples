@@ -9,18 +9,20 @@ onMounted(() => {
   // Step.repeatCountMaxDefault = 15;
   // Step.showLog = false;
 });
-/** 日志浮窗：根透明；内联调试（inline=1）：黑底 */
+/** 日志 / 测试浮窗：根透明；内联调试（inline=1）：黑底 */
 function syncLogPanelRootClass(): void {
   const q = route.query.inline;
   const isInlineLogRoute = q === "1" || (Array.isArray(q) && q[0] === "1");
   const isLog = route.path === "/logs";
+  const isTest = route.path === "/test";
+  const isPanel = isLog || isTest;
   document.documentElement.classList.toggle(
     "log-panel-transparent",
-    isLog && !isInlineLogRoute,
+    isPanel && !isInlineLogRoute,
   );
   document.documentElement.classList.toggle(
     "log-panel-inline",
-    isLog && isInlineLogRoute,
+    isPanel && isInlineLogRoute,
   );
 }
 

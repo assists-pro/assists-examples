@@ -21,13 +21,13 @@ class WechatCollectOfficialAccount {
     switchContacts = async (step: Step): Promise<Step | undefined> => {
         const packageName = step.getPackageName();
         if (packageName !== wechatEnter.wechatPackageName) {
-            log('微信打开失败')
+            log('WX打开失败')
             return undefined
         }
 
         const bottomBarNode = step.findByTags(NodeClassValue.RelativeLayout, { filterViewId: "com.tencent.mm:id/huj" })[0];
         if (!bottomBarNode) {
-            log('微信底部栏未找到，尝试返回重试')
+            log('WX底部栏未找到，尝试返回重试')
             step.back();
             return step.repeat()
         }
@@ -39,7 +39,7 @@ class WechatCollectOfficialAccount {
         } else {
             log('点击"通讯录"失败')
         }
-        return step.next(this.enterOfficialAccount.bind(this))
+        return step.next(this.enterOfficialAccount)
     };
 
 
@@ -66,7 +66,7 @@ class WechatCollectOfficialAccount {
             log('点击"公众号"失败')
         }
         this.officialAccountList.length = 0
-        return step.next(this.collectOfficialAccounts.bind(this))
+        return step.next(this.collectOfficialAccounts)
     };
 
     private collectOfficialAccounts = async (step: Step): Promise<Step | undefined> => {
