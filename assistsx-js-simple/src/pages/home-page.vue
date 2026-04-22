@@ -4,6 +4,9 @@ import { ElMessageBox } from 'element-plus'
 import { onMounted } from 'vue'
 import { buildLogPanelFloatUrl, buildTestPanelFloatUrl } from '@/core/float-log-url'
 
+/** 仅开发模式展示首页「测试」入口 */
+const isDev = import.meta.env.DEV
+
 onMounted(() => {
   document.title = 'Assists Web示例'
 })
@@ -83,7 +86,12 @@ async function openTestFloat() {
         <span class="action-title">批量取关公众号</span>
         <span class="action-sub">先采集列表，再在子页勾选取关</span>
       </button>
-      <button type="button" class="action action--test" @click="openTestFloat">
+      <button
+        v-if="isDev"
+        type="button"
+        class="action action--test"
+        @click="openTestFloat"
+      >
         <span class="action-title">测试</span>
         <span class="action-sub">浮窗打开测试面板（测试 / 日志）</span>
       </button>
