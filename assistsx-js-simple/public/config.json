@@ -4,12 +4,11 @@
     "versionName": "0.0.1",
     "versionCode": 1,
     "description": "一个示例插件，展示assistsx-js插件的开发流程",
-    "isShowOverlay": true,
+    "isShowOverlay": false,
     "needScreenCapture": false,
     "packageName": "com.assistsx.example",
     "main": "index.html",
     "index": "index.html",
-    "indexInOverlay": true,
-    "icon": "simple.png",
+    "icon": "icon.jpg",
     "overlayTitle": "assistsx-js示例"
 }

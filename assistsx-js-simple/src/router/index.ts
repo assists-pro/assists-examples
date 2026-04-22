@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
-import HomePage from '../pages/HomePage.vue'
-import LogPage from '../pages/LogPage.vue'
-import UnfollowOfficialAccountPage from '../pages/UnfollowOfficialAccountPage.vue'
+import HomePage from '../pages/home-page.vue'
+import LogPage from '../pages/log-page.vue'
+import UnfollowOfficialAccountPage from '../pages/unfollow-official-account-page.vue'
 
 const router = createRouter({
     history: createWebHashHistory(),

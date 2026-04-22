@@ -27,10 +27,12 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { ElButton, ElCheckbox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
-import { officialAccountList } from '../core/WechatCollectOfficialAccount'
-import { start as startWechatUnfollowOfficialAccount } from '@/core/WechatUnfollowOfficialAccount'
+import { float } from 'assistsx-js'
+import { wechatCollectOfficialAccount } from '../core/wechat-collect-official-account'
+import { buildLogPanelFloatUrl } from '@/core/float-log-url'
+import { STORAGE_KEY_UNFOLLOW_ACCOUNTS } from '@/logging/app-log'
 const router = useRouter()
-const officialAccounts = ref(officialAccountList)
+const officialAccounts = ref(wechatCollectOfficialAccount.officialAccountList)
 const selectedAccounts = ref<string[]>([])
 const originalTitle = document.title
 
@@ -42,8 +44,13 @@ onMounted(() => {
 onUnmounted(() => {
     document.title = originalTitle
 })
-const handleUnfollow = () => {
-    startWechatUnfollowOfficialAccount(selectedAccounts.value)
+const handleUnfollow = async () => {
+    sessionStorage.setItem(
+        STORAGE_KEY_UNFOLLOW_ACCOUNTS,
+        JSON.stringify(selectedAccounts.value),
+    )
+    const url = buildLogPanelFloatUrl({ task: 'unfollow' })
+    await float.open(url, { showBottomOperationArea: true })
 }
 
 const handleCancel = () => {

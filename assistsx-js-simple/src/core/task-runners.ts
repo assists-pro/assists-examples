@@ -1,0 +1,77 @@
+import { AssistsX } from 'assistsx-js'
+import {
+  STORAGE_KEY_UNFOLLOW_ACCOUNTS,
+  log,
+  clearLogs,
+} from '@/logging/app-log'
+import { wechatCollectAccountInfo } from '@/core/wechat-collect-account-info'
+import { wechatCollectMoment } from '@/core/wechat-collect-moment'
+import { wechatCollectOfficialAccount } from '@/core/wechat-collect-official-account'
+import { wechatUnfollowOfficialAccount } from '@/core/wechat-unfollow-official-account'
+import { wxMomentLike } from '@/core/wx-moment-like'
+
+/** 日志页 URL query ?task= 取值 */
+export const TASK_IDS = [
+  'accountInfo',
+  'collectMoment',
+  'momentLike',
+  'collectOfficial',
+  'unfollow',
+  'test',
+] as const
+
+export type TaskId = (typeof TASK_IDS)[number]
+
+export function isKnownTask(task: string | undefined): task is TaskId {
+  return TASK_IDS.includes(task as TaskId)
+}
+
+/**
+ * 根据日志页传入的 task 启动对应自动化（浮窗实例内调用）
+ */
+export async function runTaskByQuery(task: string | undefined): Promise<void> {
+  if (!task || !task.trim()) {
+    return
+  }
+
+  switch (task as TaskId) {
+    case 'accountInfo':
+      wechatCollectAccountInfo.start()
+      break
+    case 'collectMoment':
+      wechatCollectMoment.start()
+      break
+    case 'momentLike':
+      wxMomentLike.start()
+      break
+    case 'collectOfficial':
+      wechatCollectOfficialAccount.start()
+      break
+    case 'unfollow': {
+      let accounts: string[] = []
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY_UNFOLLOW_ACCOUNTS)
+        if (raw) {
+          const parsed = JSON.parse(raw) as unknown
+          if (Array.isArray(parsed)) {
+            accounts = parsed.filter((x): x is string => typeof x === 'string')
+          }
+        }
+      } catch {
+        accounts = []
+      }
+      sessionStorage.removeItem(STORAGE_KEY_UNFOLLOW_ACCOUNTS)
+      wechatUnfollowOfficialAccount.start(accounts)
+      break
+    }
+    case 'test':
+      await clearLogs()
+      log(
+        AssistsX.findByTextAllMatch('微信助手')[0]?.text ??
+          '(no node matching 微信助手)',
+      )
+      break
+    default:
+      log(`Unknown task: ${task}`)
+  }
+}
